@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/jpg" href="https://tse2.mm.bing.net/th?id=OIP.RiSUAxvAcy0PQlQFHd4E4wHaHa&pid=Api&P=0&h=180"/>
+    <title>Quick-Sign</title>
+    <style>
+      * {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        width: 100%;
+        font-family: cursive;
+      }
+      .main {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      .top,
+      .bottom {
+        display: flex;
+        justify-content: space-between;
+        margin: 20px 0px;
+      }
+      .block,
+      input,
+      select,
+      button {
+        width: 80%;
+      }
+      .top > .block {
+        margin: 10px;
+      }
+      .bottom > button {
+        margin: 10px;
+      }
+      .block > p {
+        margin: 10px auto;
+        width: 50%;
+      }
+      canvas{
+        border: 2px dotted black;
+      }
+    </style>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <div class="main">
+      <div class="top">
+        <div class="block">
+          <p>Text Color</p>
+          <input class="form-control" type="color" id="colorPicker" />
+        </div>
+        <div class="block">
+          <p>Background</p>
+          <input class="form-control" type="color" id="canvaColor" />
+        </div>
+        <div class="block">
+          <p>Font Size</p>
+          <select id="fontsize">
+            <option value="5">5px</option>
+            <option value="10">10px</option>
+            <option value="15">15px</option>
+            <option value="20">20px</option>
+            <option value="25">25px</option>
+            <option value="30">30px</option>
+            <option value="40">40px</option>
+          </select>
+        </div>
+      </div>
+
+      <canvas class="canvas" id="myCanvas" width="800" height="500"> </canvas>
+      <div class="bottom">
+        <button type="button" class="btn btn-danger" id="clearButton">
+          Clear
+        </button>
+        <button type="button" class="btn btn-success" id="saveButton">
+          Download
+        </button>
+        <button type="button" class="btn btn-warning" id="retrieveButton">
+          Retrieve Save Signature
+        </button>
+      </div>
+    </div>
+
+    <script>
+        const colorPicker = document.querySelector("#colorPicker")
+        const canvasColor = document.querySelector("#canvaColor")
+        const canvas = document.querySelector("#myCanvas")
+        const clearButton = document.querySelector("#clearButton")
+        const saveButton = document.querySelector("#saveButton")
+        const retrieveButton = document.querySelector("#retrieveButton")
+        const fontPicker = document.querySelector("#fontsize")
+        const ctx = canvas.getContext('2d')
+
+let isDrawing = false;
+let lastX = 0;
+let lastY = 0;
+
+        colorPicker.addEventListener('change',(e)=>{
+            ctx.strokeStyle = e.target.value;
+            ctx.fillStyle = e.target.value;
+        })
+
+        canvas.addEventListener('mousedown',(e)=>{
+            isDrawing = true;
+            lastX = e.offsetX;
+            lastY =e.offsetY;
+        })
+
+        canvas.addEventListener("mousemove",(e)=>{
+            if(isDrawing){
+                ctx.beginPath();
+                ctx.moveTo(lastX,lastY);
+                ctx.lineTo(e.offsetX,e.offsetY);
+                ctx.stroke();
+
+                lastX = e.offsetX;
+                lastY = e.offsetY;
+            }
+        })
+
+        canvas.addEventListener("mouseup",()=>{
+            isDrawing = false;
+        })
+        canvasColor.addEventListener('change',(e)=>{
+            ctx.fillStyle=e.target.value;
+            ctx.fillRect(0,0,800,500)
+        })
+        fontPicker.addEventListener('change',(e)=>{
+            ctx.lineWidth = e.target.value;
+
+        })
+        clearButton.addEventListener("click",()=>{
+            ctx.clearRect(0,0,canvas.width,canvas.height)
+        })
+        saveButton.addEventListener("click",(e)=>{
+            localStorage.setItem("canvasContents",canvas.toDataURL())
+
+            let link= document.createElement('a');
+            link.download='my-Signature.png'
+            link.href=canvas.toDataURL();
+            link.click()
+        })
+        retrieveButton.addEventListener('click',(e)=>{
+          let savedCanvas=  localStorage.getItem("canvasContents")
+          if(savedCanvas){
+            let img = new Image();
+            img.src=savedCanvas
+           img.onload = () => {
+            ctx.drawImage(img, 0, 0);
+        };
+          }
+        })
+    </script>
+  </body>
+</html>
